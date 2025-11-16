@@ -25,15 +25,17 @@ CREATE TABLE SOCIO (
 );
 
 -- Tabla: MEMBRESIA
+
 CREATE TABLE MEMBRESIA (
     id INT IDENTITY(1,1) PRIMARY KEY,
-    nombre NVARCHAR(50) NOT NULL,
-    duracion INT NOT NULL CHECK (duracion > 0),
+    tipo NVARCHAR(50) NOT NULL CHECK (tipo IN ('Básica', 'Premium', 'VIP')),
+    duracion NVARCHAR(20) NOT NULL CHECK (duracion IN ('Mensual', 'Trimestral', 'Anual')),
     precio DECIMAL(10,2) NOT NULL CHECK (precio > 0),
-    estado NVARCHAR(20) NOT NULL DEFAULT 'activa' CHECK (estado IN ('activa', 'inactiva'))
+    CONSTRAINT UQ_MEMBRESIA_TIPO_DURACION UNIQUE (tipo, duracion)
 );
 
 -- Tabla: ENTRENADOR
+
 CREATE TABLE ENTRENADOR (
     id INT IDENTITY(1,1) PRIMARY KEY,
     nombre NVARCHAR(100) NOT NULL,
@@ -42,7 +44,7 @@ CREATE TABLE ENTRENADOR (
     fecha_inicio_inscripcion DATE NOT NULL,
     fecha_final_inscripcion DATE NULL,
     salario DECIMAL(10,2) NOT NULL CHECK (salario > 0),
-    especialidad NVARCHAR(100) NOT NULL
+    especialidad NVARCHAR(100) NOT NULL CHECK (especialidad IN ('Yoga', 'Spinning', 'CrossFit', 'Musculación', 'Calistenia','Pilates'))
 );
 
 -- Tabla: FACTURA
@@ -56,6 +58,7 @@ CREATE TABLE FACTURA (
     CONSTRAINT FK_FACTURA_SOCIO FOREIGN KEY (id_socio) REFERENCES SOCIO(id) ON DELETE CASCADE,
     CONSTRAINT FK_FACTURA_MEMBRESIA FOREIGN KEY (id_membresia) REFERENCES MEMBRESIA(id) ON DELETE CASCADE
 );
+
 
 -- Tabla: CLASE
 CREATE TABLE CLASE (
@@ -80,7 +83,6 @@ CREATE TABLE RESERVA (
     CONSTRAINT UQ_RESERVA_SOCIO_CLASE_FECHA UNIQUE (id_socio, id_clase, fecha_clase),
     CONSTRAINT CK_RESERVA_FECHAS CHECK (fecha_clase >= fecha_reserva)
 );
-GO
 
 -- =====================================================
 -- 3. CREAR USUARIOS
