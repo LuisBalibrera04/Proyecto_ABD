@@ -99,7 +99,6 @@ CREATE USER U_Lector WITH PASSWORD = 'Lectura@ABD25';
 
 -- Usuario 4: Solo Backups
 CREATE USER U_Respaldos WITH PASSWORD = 'Backups@ABD25';
-GO
 
 -- =====================================================
 -- 4. CREAR ROLES Y ASIGNAR PERMISOS
