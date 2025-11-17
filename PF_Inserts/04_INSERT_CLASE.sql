@@ -66,3 +66,5 @@ INSERT INTO CLASE (tipo, horario, duracion_minutos, cupo, id_entrenador) VALUES
 ('Pilates Terapéutico', '16:00:00', 75, 32, 12),
 ('Pilates Avanzado', '18:00:00', 60, 35, 18),
 ('Pilates Vespertino', '20:00:00', 60, 42, 24);
+
+SELECT * FROM CLASE

@@ -29,3 +29,5 @@ INSERT INTO ENTRENADOR (nombre, telefono, email, fecha_inicio_inscripcion, fecha
 ('Jessica Alejandra Ruiz Alvarado', '503-7145-6783', 'jessica.ruiz@fitgym.com', '2023-06-11', '2026-06-11', 900.00, 'Calistenia'),
 ('Julio César Maldonado Cervantes', '503-6856-7894', 'julio.maldonado@fitgym.com', '2022-02-24', '2024-08-31', 850.00, 'Pilates'),
 ('Mariana Victoria Ávila Espinoza', '503-7267-8905', 'mariana.avila@fitgym.com', '2021-07-13', '2024-07-13', 850.00, 'Yoga');
+
+SELECT * FROM ENTRENADOR

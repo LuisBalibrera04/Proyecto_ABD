@@ -300,3 +300,5 @@ INSERT INTO SOCIO (nombre, telefono, email, genero, fecha_registro, estado, dui)
 ('Claudia Diana Díaz Ramos', '503-7008-6574', 'claudia.diaz297@gmail.com', 'F', '2025-08-31', 'activo', '98874915-8'),
 ('Fernando Héctor Ramírez Martínez', '503-7759-3232', 'fernando.ramirez298@hotmail.com', 'M', '2025-09-02', 'activo', '99476232-2'),
 ('Valeria Claudia Ramírez Ortiz', '503-7712-7063', 'valeria.ramirez299@gmail.com', 'F', '2025-09-04', 'activo', '99501813-9');
+
+SELECT * FROM SOCIO
