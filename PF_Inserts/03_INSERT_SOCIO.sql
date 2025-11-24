@@ -1,5 +1,6 @@
 -- Inserciones para la tabla SOCIO (300 registros)
-INSERT INTO SOCIO (nombre, telefono, email, genero, fecha_registro, estado, dui) VALUES
+
+INSERT INTO Negocio.SOCIO (nombre, telefono, email, genero, fecha_registro, estado, dui) VALUES
 ('Héctor Mario Méndez Ortiz', '503-7639-7415', 'hector.mendez0@outlook.com', 'M', '2024-01-15', 'inactivo', '10321616-5'),
 ('Gabriela Verónica Cruz Romero', '503-6170-7591', 'gabriela.cruz1@hotmail.com', 'F', '2024-01-17', 'activo', '10918360-7'),
 ('Diego Sergio Díaz López', '503-7743-5854', 'diego.diaz2@hotmail.com', 'M', '2024-01-19', 'activo', '11359549-4'),
@@ -301,4 +302,4 @@ INSERT INTO SOCIO (nombre, telefono, email, genero, fecha_registro, estado, dui)
 ('Fernando Héctor Ramírez Martínez', '503-7759-3232', 'fernando.ramirez298@hotmail.com', 'M', '2025-09-02', 'activo', '99476232-2'),
 ('Valeria Claudia Ramírez Ortiz', '503-7712-7063', 'valeria.ramirez299@gmail.com', 'F', '2025-09-04', 'activo', '99501813-9');
 
-SELECT * FROM SOCIO
+SELECT * FROM Negocio.SOCIO;
