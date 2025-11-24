@@ -525,3 +525,89 @@ SELECT
     SUM(monto) AS MontoTotalRecaudado
 FROM Negocio.FACTURA
 GROUP BY metodo_pago;
+
+
+-- 4. Seguridad y mantenimiento.
+
+-- Creando roles y usuarios. --
+
+-- Roles.
+CREATE ROLE R_Asistente_Administrativo;
+CREATE ROLE R_Contabilidad;
+CREATE ROLE R_Lector;
+CREATE ROLE R_Reportes;
+
+-- Usuarios.
+CREATE USER U_Asistente WITH PASSWORD = 'Asistente@ABD25';
+CREATE USER U_Contabilidad WITH PASSWORD = 'Contabilidad@ABD25';
+CREATE USER U_Lector WITH PASSWORD = 'Lector@ABD25';
+CREATE USER U_Respaldos WITH PASSWORD = 'Backups@ABD25';
+CREATE USER U_ReportesBI WITH PASSWORD = 'Reportes@ABD25';
+
+-- Asignando permisos a roles. --
+
+-- ROL 1: R_Asistente_Administrativo.
+-- Tareas: Registrar, ver facturas y clases, reservar.
+GRANT SELECT, INSERT, UPDATE, DELETE ON Negocio.SOCIO TO R_Asistente_Administrativo;
+GRANT SELECT ON Negocio.FACTURA TO R_Asistente_Administrativo;
+GRANT SELECT ON Negocio.MEMBRESIA TO R_Asistente_Administrativo;
+GRANT SELECT, INSERT, UPDATE, DELETE ON Negocio.RESERVA TO R_Asistente_Administrativo;
+GRANT SELECT ON Negocio.CLASE TO R_Asistente_Administrativo;
+GRANT SELECT ON Negocio.ENTRENADOR TO R_Asistente_Administrativo;
+
+-- ROL 2: R_Contabilidad.
+-- Tareas: Acceso total a socios y facturas, y consultas de auditoría.
+GRANT SELECT, INSERT, UPDATE, DELETE ON Negocio.SOCIO TO R_Contabilidad;
+GRANT SELECT, INSERT, UPDATE, DELETE ON Negocio.FACTURA TO R_Contabilidad;
+GRANT EXECUTE ON SCHEMA::Auditoria TO R_Contabilidad;
+GRANT SELECT ON SCHEMA::Auditoria TO R_Contabilidad;
+
+-- ROL 3: R_Lector
+-- Tareas: Acceso de solo lectura a todas las tablas del negocio y reportes.
+GRANT SELECT ON SCHEMA::Negocio TO R_Lector;
+GRANT SELECT ON SCHEMA::Reportes TO R_Lector;
+
+-- ROL 4: R_Reportes.
+-- Tareas: Acceso solo a las vistas de Reportes.
+GRANT SELECT ON SCHEMA::Reportes TO R_Reportes;
+
+-- Asignando usuario a roles.
+ALTER ROLE R_Asistente_Administrativo ADD MEMBER U_Asistente;
+ALTER ROLE R_Contabilidad ADD MEMBER U_Contabilidad;
+ALTER ROLE R_Lector ADD MEMBER U_Lector;
+ALTER ROLE R_Reportes ADD MEMBER U_ReportesBI;
+ALTER ROLE db_backupoperator ADD MEMBER U_Respaldos;
+
+
+-- Plan de backup. --
+
+ALTER DATABASE GimnasioReservas SET RECOVERY FULL;
+
+-- FULL backup.
+BACKUP DATABASE GimnasioReservas
+TO DISK = 'C:\Backups\Gym_Full.bak'
+WITH COMPRESSION, NAME = 'GimnasioReserva full backup', INIT;
+
+-- LOG backup.
+BACKUP LOG GimnasioReservas
+TO DISK = 'C:\Backups\Gym_Cadena.trn'
+WITH NOINIT;
+
+-- Comandos de restauración. --
+
+-- Colocando en unico usuario.
+ALTER DATABASE GimnasioReservas
+SET SINGLE_USER
+WITH ROLLBACK IMMEDIATE;
+
+-- 1. FULL backup.
+RESTORE DATABASE GimnasioReservas
+FROM DISK = 'C:\Backups\Gym_Full.bak' WITH REPLACE, NORECOVERY;
+
+-- 2. LOGs backup.
+RESTORE LOG GimnasioReservas
+FROM DISK = 'C:\Backups\Gym_Cadena.trn' WITH RECOVERY;
+
+-- Volviendo a multiusuario.
+ALTER DATABASE GimnasioReservas
+SET MULTI_USER;
