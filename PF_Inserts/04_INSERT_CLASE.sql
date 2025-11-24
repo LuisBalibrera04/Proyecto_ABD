@@ -4,7 +4,7 @@
 -- Cupos entre 30 y 60 personas
 -- IDs de entrenadores del 1 al 25
 
-INSERT INTO CLASE (tipo, horario, duracion_minutos, cupo, id_entrenador) VALUES
+INSERT INTO Negocio.CLASE (tipo, horario, duracion_minutos, cupo, id_entrenador) VALUES
 -- Clases de Yoga (8 clases) - Entrenadores: 1, 7, 13, 19, 25
 ('Yoga Matutino', '06:00:00', 60, 35, 1),
 ('Yoga Restaurativo', '08:00:00', 75, 42, 7),
@@ -67,4 +67,4 @@ INSERT INTO CLASE (tipo, horario, duracion_minutos, cupo, id_entrenador) VALUES
 ('Pilates Avanzado', '18:00:00', 60, 35, 18),
 ('Pilates Vespertino', '20:00:00', 60, 42, 24);
 
-SELECT * FROM CLASE
+SELECT * FROM Negocio.CLASE;
