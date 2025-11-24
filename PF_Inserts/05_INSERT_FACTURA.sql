@@ -5003,4 +5003,4 @@ INSERT INTO Negocio.FACTURA (metodo_pago, monto, fecha_pago, id_socio, id_membre
 INSERT INTO Negocio.FACTURA (metodo_pago, monto, fecha_pago, id_socio, id_membresia) VALUES ('transferencia', 25.00, '2024-10-17 15:47:57', 179, 1);
 INSERT INTO Negocio.FACTURA (metodo_pago, monto, fecha_pago, id_socio, id_membresia) VALUES ('efectivo', 67.50, '2024-11-05 14:17:43', 220, 2);
 
-SELECT * FROM Negocio.Negocio.FACTURA;
+-- SELECT * FROM Negocio.FACTURA;

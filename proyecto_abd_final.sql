@@ -3,6 +3,7 @@
 -- 1. Preparación de la base de datos.
 
 -- Creando base de datos. --
+USE MASTER;
 
 CREATE DATABASE GimnasioReservas
 CONTAINMENT = PARTIAL;
@@ -595,10 +596,13 @@ WITH NOINIT;
 
 -- Comandos de restauración. --
 
+USE MASTER;
+
 -- Colocando en unico usuario.
 ALTER DATABASE GimnasioReservas
 SET SINGLE_USER
 WITH ROLLBACK IMMEDIATE;
+GO
 
 -- 1. FULL backup.
 RESTORE DATABASE GimnasioReservas

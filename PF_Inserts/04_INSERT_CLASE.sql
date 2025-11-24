@@ -4,6 +4,8 @@
 -- Cupos entre 30 y 60 personas
 -- IDs de entrenadores del 1 al 25
 
+USE GimnasioReservas;
+
 INSERT INTO Negocio.CLASE (tipo, horario, duracion_minutos, cupo, id_entrenador) VALUES
 -- Clases de Yoga (8 clases) - Entrenadores: 1, 7, 13, 19, 25
 ('Yoga Matutino', '06:00:00', 60, 35, 1),

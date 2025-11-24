@@ -2,6 +2,8 @@
 -- Algunos tienen contratos vigentes (fechas futuras)
 -- Algunos tienen contratos ya finalizados (fechas pasadas)
 
+USE GimnasioReservas;
+
 INSERT INTO Negocio.ENTRENADOR (nombre, telefono, email, fecha_inicio_inscripcion, fecha_final_inscripcion, salario, especialidad) VALUES
 ('Carolina Beatriz Morales Delgado', '503-7823-4567', 'carolina.morales@fitgym.com', '2022-03-15', '2027-03-15', 850.00, 'Yoga'),
 ('Roberto Francisco Salinas Castro', '503-6934-5678', 'roberto.salinas@fitgym.com', '2021-06-20', '2025-06-20', 950.00, 'Spinning'),
@@ -29,4 +31,4 @@ INSERT INTO Negocio.ENTRENADOR (nombre, telefono, email, fecha_inicio_inscripcio
 ('Julio César Maldonado Cervantes', '503-6856-7894', 'julio.maldonado@fitgym.com', '2022-02-24', '2024-08-31', 850.00, 'Pilates'),
 ('Mariana Victoria Ávila Espinoza', '503-7267-8905', 'mariana.avila@fitgym.com', '2021-07-13', '2024-07-13', 850.00, 'Yoga');
 
-SELECT * FROM Negocio.ENTRENADOR;
+-- SELECT * FROM Negocio.ENTRENADOR;

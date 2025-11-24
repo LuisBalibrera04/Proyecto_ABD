@@ -15003,4 +15003,4 @@ INSERT INTO Negocio.RESERVA (fecha_reserva, fecha_clase, id_socio, id_clase) VAL
 INSERT INTO Negocio.RESERVA (fecha_reserva, fecha_clase, id_socio, id_clase) VALUES ('2024-09-09', '2025-08-09', 262, 49);
 INSERT INTO Negocio.RESERVA (fecha_reserva, fecha_clase, id_socio, id_clase) VALUES ('2025-01-01', '2025-09-27', 230, 24);
 
-SELECT * FROM Negocio.RESERVA;
+-- SELECT * FROM Negocio.RESERVA;
