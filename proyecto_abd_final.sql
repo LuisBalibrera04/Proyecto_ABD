@@ -1,22 +1,22 @@
 -- Proyecto de catedra: GimnasioReserva --
 
--- 1. Preparación de la Base de Datos.
+-- 1. Preparación de la base de datos.
 
--- Creando base de datos.
+-- Creando base de datos. --
 
 CREATE DATABASE GimnasioReservas
 CONTAINMENT = PARTIAL;
 
 USE GimnasioReservas;
 
--- 2. Creando esquemas.
+-- Creando esquemas. --
 
 CREATE SCHEMA Negocio;
 CREATE SCHEMA Auditoria;
 CREATE SCHEMA Reportes;
 CREATE SCHEMA Config;
 
--- Creando tablas principales.
+-- Creando tablas principales. --
 
 -- Tabla: SOCIO
 CREATE TABLE Negocio.SOCIO (
@@ -87,7 +87,7 @@ CREATE TABLE Negocio.RESERVA (
     CONSTRAINT CK_RESERVA_FECHAS CHECK (fecha_clase >= fecha_reserva)
 );
 
--- Creando tablas de auditoria.
+-- Creando tablas de auditoria. --
 
 CREATE TABLE Auditoria.SOCIO_Audit (
     audit_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -122,3 +122,76 @@ CREATE TABLE Auditoria.FACTURA_Audit (
     host_name VARCHAR(100) DEFAULT HOST_NAME(),
     app_name VARCHAR(100) DEFAULT APP_NAME()
 );
+
+
+-- 2. Inserción de datos y estructura de mantenimiento.
+
+-- Ejecutar los otros scripts con los insert de cada tabla. --
+
+-- Creando índices para optimizar funciones ventanas y consultas de auditoría. --
+
+-- ÍNDICES FUNCIÓN VENTANA 1: RANKING DE SOCIOS POR GASTO TOTAL
+
+-- Índice compuesto para JOIN entre SOCIO y FACTURA
+CREATE NONCLUSTERED INDEX IX_FACTURA_Socio_Monto
+ON Negocio.FACTURA(id_socio, monto)
+INCLUDE (id, fecha_pago);
+
+-- Índice para filtrar socios por estado
+CREATE NONCLUSTERED INDEX IX_SOCIO_Estado_Nombre
+ON Negocio.SOCIO(estado, nombre)
+INCLUDE (id, email);
+
+
+-- ÍNDICES FUNCIÓN VENTANA 2: ANÁLISIS DE OCUPACIÓN DE CLASES
+
+-- Índice para JOIN entre CLASE y RESERVA
+CREATE NONCLUSTERED INDEX IX_RESERVA_Clase_FechaClase_Opt
+ON Negocio.RESERVA(id_clase, fecha_clase)
+INCLUDE (id, id_socio);
+
+-- Índice para CLASE con especialidad del entrenador
+CREATE NONCLUSTERED INDEX IX_CLASE_Entrenador_Tipo
+ON Negocio.CLASE(id_entrenador, tipo, horario)
+INCLUDE (cupo);
+
+-- Índice para ENTRENADOR especialidad
+CREATE NONCLUSTERED INDEX IX_ENTRENADOR_Especialidad_Opt
+ON Negocio.ENTRENADOR(especialidad)
+INCLUDE (id, nombre, email);
+
+
+-- ÍNDICES FUNCIÓN VENTANA 3: ANÁLISIS TEMPORAL DE INGRESOS
+
+-- Índice para análisis temporal de facturas
+CREATE NONCLUSTERED INDEX IX_FACTURA_FechaPago_Monto_Opt
+ON Negocio.FACTURA(fecha_pago, monto)
+INCLUDE (id, metodo_pago);
+
+-- Índice para agrupaciones por año/mes
+CREATE NONCLUSTERED INDEX IX_FACTURA_AnioMes
+ON Negocio.FACTURA(fecha_pago)
+INCLUDE (monto, id);
+
+
+-- Para tabla de Auditoria.Socio_audit
+
+-- Índice para auditoría por fecha y socio
+CREATE NONCLUSTERED INDEX IX_SOCIO_Audit_Fecha
+ON Auditoria.SOCIO_Audit(fecha_operacion DESC, id_socio);
+
+-- Para tabla de Auditoria.FACTURA_Audit
+
+-- Índice para auditoría por fecha y factura
+CREATE NONCLUSTERED INDEX IX_FACTURA_Audit_Fecha
+ON Auditoria.FACTURA_Audit(fecha_operacion DESC, id_factura);
+
+
+-- Actualización de estadísticas después de crear índices --
+UPDATE STATISTICS Negocio.SOCIO WITH FULLSCAN;
+UPDATE STATISTICS Negocio.FACTURA WITH FULLSCAN;
+UPDATE STATISTICS Negocio.CLASE WITH FULLSCAN;
+UPDATE STATISTICS Negocio.ENTRENADOR WITH FULLSCAN;
+UPDATE STATISTICS Negocio.RESERVA WITH FULLSCAN;
+UPDATE STATISTICS Auditoria.SOCIO_Audit WITH FULLSCAN;
+UPDATE STATISTICS Auditoria.FACTURA_Audit WITH FULLSCAN;
