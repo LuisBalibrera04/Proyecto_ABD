@@ -1,3 +1,7 @@
+-- Inserciones para la tabla RESERVA (15000 registros)
+
+USE GimnasioReservas;
+
 INSERT INTO RESERVA (fecha_reserva, fecha_clase, id_socio, id_clase) VALUES ('2024-05-05', '2024-10-08', 58, 2);
 INSERT INTO RESERVA (fecha_reserva, fecha_clase, id_socio, id_clase) VALUES ('2024-03-27', '2024-04-14', 115, 9);
 INSERT INTO RESERVA (fecha_reserva, fecha_clase, id_socio, id_clase) VALUES ('2025-03-08', '2025-08-27', 280, 6);
@@ -14998,3 +15002,5 @@ INSERT INTO RESERVA (fecha_reserva, fecha_clase, id_socio, id_clase) VALUES ('20
 INSERT INTO RESERVA (fecha_reserva, fecha_clase, id_socio, id_clase) VALUES ('2024-10-26', '2024-11-08', 120, 50);
 INSERT INTO RESERVA (fecha_reserva, fecha_clase, id_socio, id_clase) VALUES ('2024-09-09', '2025-08-09', 262, 49);
 INSERT INTO RESERVA (fecha_reserva, fecha_clase, id_socio, id_clase) VALUES ('2025-01-01', '2025-09-27', 230, 24);
+
+SELECT * FROM Negocio.RESERVA;
