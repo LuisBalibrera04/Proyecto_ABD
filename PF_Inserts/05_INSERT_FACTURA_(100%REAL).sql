@@ -1,4 +1,6 @@
-USE GimnasioReservas
+-- Inserciones para la tabla FACTURA (5000 registros)
+
+USE GimnasioReservas;
 
 INSERT INTO FACTURA (metodo_pago, monto, fecha_pago, id_socio, id_membresia) VALUES ('transferencia', 67.50, '2025-01-18 10:59:14', 9, 2);
 INSERT INTO FACTURA (metodo_pago, monto, fecha_pago, id_socio, id_membresia) VALUES ('tarjeta', 67.50, '2024-12-17 09:50:24', 152, 2);
@@ -5001,4 +5003,4 @@ INSERT INTO FACTURA (metodo_pago, monto, fecha_pago, id_socio, id_membresia) VAL
 INSERT INTO FACTURA (metodo_pago, monto, fecha_pago, id_socio, id_membresia) VALUES ('transferencia', 25.00, '2024-10-17 15:47:57', 179, 1);
 INSERT INTO FACTURA (metodo_pago, monto, fecha_pago, id_socio, id_membresia) VALUES ('efectivo', 67.50, '2024-11-05 14:17:43', 220, 2);
 
-SELECT * FROM FACTURA
+SELECT * FROM Negocio.FACTURA;
