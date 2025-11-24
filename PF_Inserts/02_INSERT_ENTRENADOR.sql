@@ -29,4 +29,4 @@ INSERT INTO Negocio.ENTRENADOR (nombre, telefono, email, fecha_inicio_inscripcio
 ('Julio César Maldonado Cervantes', '503-6856-7894', 'julio.maldonado@fitgym.com', '2022-02-24', '2024-08-31', 850.00, 'Pilates'),
 ('Mariana Victoria Ávila Espinoza', '503-7267-8905', 'mariana.avila@fitgym.com', '2021-07-13', '2024-07-13', 850.00, 'Yoga');
 
-SELECT * FROM Negocio.ENTRENADOR
+SELECT * FROM Negocio.ENTRENADOR;
