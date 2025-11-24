@@ -6,9 +6,8 @@
 -- Descuento Anual: 20% menos que pagar 12 meses sueltos
 
 USE GimnasioReservas;
-GO
 
-INSERT INTO MEMBRESIA (tipo, duracion, precio) VALUES
+INSERT INTO Negocio.MEMBRESIA (tipo, duracion, precio) VALUES
 -- Membresías Básicas
 ('Básica', 'Mensual', 25.00),           -- Base: $25.00
 ('Básica', 'Trimestral', 67.50),        -- (25 x 3) - 10% = 75 - 7.5 = $67.50
