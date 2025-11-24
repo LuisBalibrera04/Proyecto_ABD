@@ -195,3 +195,333 @@ UPDATE STATISTICS Negocio.ENTRENADOR WITH FULLSCAN;
 UPDATE STATISTICS Negocio.RESERVA WITH FULLSCAN;
 UPDATE STATISTICS Auditoria.SOCIO_Audit WITH FULLSCAN;
 UPDATE STATISTICS Auditoria.FACTURA_Audit WITH FULLSCAN;
+
+
+-- 3. Lógica de negocio y análisis avanzado.
+
+-- Creando triggers de auditoría. --
+
+-- Registra la creación de un nuevo socio en la tabla de Auditoría.
+CREATE TRIGGER trg_SOCIO_Insert_Audit
+ON Negocio.SOCIO
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO Auditoria.SOCIO_Audit (
+        id_socio, operacion, nombre_nuevo, email_nuevo, estado_nuevo
+    )
+    SELECT 
+        i.id, 'INSERT', i.nombre, i.email, i.estado
+    FROM inserted i;
+END
+
+-- Registra cambios en los campos clave del socio.
+CREATE TRIGGER trg_SOCIO_Update_Audit
+ON Negocio.SOCIO
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO Auditoria.SOCIO_Audit (
+        id_socio, operacion, 
+        nombre_anterior, nombre_nuevo,
+        email_anterior, email_nuevo,
+        estado_anterior, estado_nuevo
+    )
+    SELECT 
+        i.id, 'UPDATE',
+        d.nombre, i.nombre,
+        d.email, i.email,
+        d.estado, i.estado
+    FROM inserted i
+    INNER JOIN deleted d ON i.id = d.id;
+END
+
+-- Registra la eliminación de un socio, capturando los valores eliminados.
+CREATE TRIGGER trg_SOCIO_Delete_Audit
+ON Negocio.SOCIO
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO Auditoria.SOCIO_Audit (
+        id_socio, operacion, nombre_anterior, email_anterior, estado_anterior
+    )
+    SELECT 
+        d.id, 'DELETE', d.nombre, d.email, d.estado
+    FROM deleted d;
+END
+
+-- Registra la inserción de una nueva factura.
+CREATE TRIGGER trg_FACTURA_Insert_Audit
+ON Negocio.FACTURA
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO Auditoria.FACTURA_Audit (
+        id_factura, operacion, 
+        id_socio_nuevo, monto_nuevo, 
+        metodo_pago_nuevo, fecha_pago_nuevo
+    )
+    SELECT 
+        i.id, 'INSERT',
+        i.id_socio, i.monto, i.metodo_pago, i.fecha_pago
+    FROM inserted i;
+END
+
+-- Registra modificaciones a los detalles de la factura.
+CREATE TRIGGER trg_FACTURA_Update_Audit
+ON Negocio.FACTURA
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO Auditoria.FACTURA_Audit (
+        id_factura, operacion,
+        id_socio_anterior, id_socio_nuevo,
+        monto_anterior, monto_nuevo,
+        metodo_pago_anterior, metodo_pago_nuevo,
+        fecha_pago_anterior, fecha_pago_nuevo
+    )
+    SELECT 
+        i.id, 'UPDATE',
+        d.id_socio, i.id_socio,
+        d.monto, i.monto,
+        d.metodo_pago, i.metodo_pago,
+        d.fecha_pago, i.fecha_pago
+    FROM inserted i
+    INNER JOIN deleted d ON i.id = d.id;
+END
+
+-- Registra la anulación o eliminación de una factura.
+CREATE TRIGGER trg_FACTURA_Delete_Audit
+ON Negocio.FACTURA
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO Auditoria.FACTURA_Audit (
+        id_factura, operacion,
+        id_socio_anterior, monto_anterior,
+        metodo_pago_anterior, fecha_pago_anterior
+    )
+    SELECT 
+        d.id, 'DELETE',
+        d.id_socio, d.monto,
+        d.metodo_pago, d.fecha_pago
+    FROM deleted d;
+END
+
+
+-- Creando stored procedures y vistas de auditoría. --
+
+-- Stored procedures
+
+-- Devuelve el tamaño en MB y número de registros de cada tabla.
+CREATE PROCEDURE Config.sp_ObtenerDimensionamientoTablas
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT 
+        t.name AS nombre_tabla,
+        s.name AS esquema,
+        p.rows AS numero_registros,
+        CAST(ROUND(((SUM(a.used_pages) * 8) / 1024.00), 2) AS NUMERIC(36, 2)) AS espacio_usado_mb,
+        CAST(ROUND(((SUM(a.total_pages) * 8) / 1024.00), 2) AS NUMERIC(36, 2)) AS espacio_total_mb,
+        CAST(ROUND(((SUM(a.total_pages) - SUM(a.used_pages)) * 8) / 1024.00, 2) AS NUMERIC(36, 2)) AS espacio_libre_mb,
+        CAST(ROUND((SUM(a.used_pages) * 8) / 1024.00 / NULLIF(p.rows, 0) * 1024, 2) AS NUMERIC(36, 2)) AS kb_por_registro
+    FROM 
+        sys.tables t
+    INNER JOIN sys.indexes i ON t.object_id = i.object_id
+    INNER JOIN sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
+    INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
+    INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
+    WHERE t.is_ms_shipped = 0
+      AND i.object_id > 255
+    GROUP BY t.name, s.name, p.rows
+    ORDER BY espacio_usado_mb DESC;
+END
+
+-- Permite consultar el historial de auditoría de socios aplicando filtros.
+CREATE PROCEDURE Auditoria.sp_ConsultarAuditoriaSocio
+    @fecha_inicio DATETIME = NULL,
+    @fecha_fin DATETIME = NULL,
+    @id_socio INT = NULL,
+    @operacion VARCHAR(10) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT * 
+    FROM Auditoria.vw_Auditoria_SOCIO
+    WHERE 
+        (@fecha_inicio IS NULL OR fecha_operacion >= @fecha_inicio)
+        AND (@fecha_fin IS NULL OR fecha_operacion <= @fecha_fin)
+        AND (@id_socio IS NULL OR id_socio = @id_socio)
+        AND (@operacion IS NULL OR operacion = @operacion)
+    ORDER BY fecha_operacion DESC;
+END
+
+-- Permite consultar el historial de auditoría de facturas aplicando filtros.
+CREATE PROCEDURE Auditoria.sp_ConsultarAuditoriaFactura
+    @fecha_inicio DATETIME = NULL,
+    @fecha_fin DATETIME = NULL,
+    @id_factura INT = NULL,
+    @operacion VARCHAR(10) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT * 
+    FROM Auditoria.vw_Auditoria_FACTURA
+    WHERE 
+        (@fecha_inicio IS NULL OR fecha_operacion >= @fecha_inicio)
+        AND (@fecha_fin IS NULL OR fecha_operacion <= @fecha_fin)
+        AND (@id_factura IS NULL OR id_factura = @id_factura)
+        AND (@operacion IS NULL OR operacion = @operacion)
+    ORDER BY fecha_operacion DESC;
+END
+
+
+-- Vistas
+
+-- Vista para consultar la auditoría de socios, añadiendo el nombre actual del socio y el tipo de cambio.
+CREATE VIEW Auditoria.vw_Auditoria_SOCIO
+AS
+SELECT 
+    a.audit_id,
+    a.id_socio,
+    s.nombre AS nombre_actual_socio,
+    a.operacion,
+    a.nombre_anterior,
+    a.nombre_nuevo,
+    a.email_anterior,
+    a.email_nuevo,
+    a.estado_anterior,
+    a.estado_nuevo,
+    a.usuario,
+    a.fecha_operacion,
+    a.host_name,
+    a.app_name,
+    CASE 
+        WHEN a.nombre_anterior != a.nombre_nuevo THEN 'Cambió nombre'
+        WHEN a.email_anterior != a.email_nuevo THEN 'Cambió email'
+        WHEN a.estado_anterior != a.estado_nuevo THEN 'Cambió estado'
+        ELSE 'Nuevo registro'
+    END AS tipo_cambio
+FROM Auditoria.SOCIO_Audit a
+LEFT JOIN Negocio.SOCIO s ON a.id_socio = s.id;
+
+-- Vista para consultar la auditoría de facturas, añadiendo la diferencia de monto y el tipo de cambio.
+CREATE VIEW Auditoria.vw_Auditoria_FACTURA
+AS
+SELECT 
+    a.audit_id,
+    a.id_factura,
+    a.operacion,
+    ISNULL(s_ant.nombre, 'N/A') AS socio_anterior,
+    ISNULL(s_nue.nombre, 'N/A') AS socio_nuevo,
+    a.monto_anterior,
+    a.monto_nuevo,
+    a.monto_nuevo - a.monto_anterior AS diferencia_monto,
+    a.metodo_pago_anterior,
+    a.metodo_pago_nuevo,
+    a.fecha_pago_anterior,
+    a.fecha_pago_nuevo,
+    a.usuario,
+    a.fecha_operacion,
+    a.host_name,
+    a.app_name,
+    CASE 
+        WHEN a.monto_anterior != a.monto_nuevo THEN 'Cambió monto'
+        WHEN a.metodo_pago_anterior != a.metodo_pago_nuevo THEN 'Cambió método de pago'
+        WHEN a.fecha_pago_anterior != a.fecha_pago_nuevo THEN 'Cambió fecha'
+        WHEN a.id_socio_anterior != a.id_socio_nuevo THEN 'Cambió socio'
+        ELSE 'Nuevo registro'
+    END AS tipo_cambio
+FROM Auditoria.FACTURA_Audit a
+LEFT JOIN Negocio.SOCIO s_ant ON a.id_socio_anterior = s_ant.id
+LEFT JOIN Negocio.SOCIO s_nue ON a.id_socio_nuevo = s_nue.id;
+
+
+-- Creando vistas de reporte con funciones ventana y agregaciones para power bi.
+
+
+-- Vista con función ventana 1: Ranking de socios por gasto total.
+CREATE VIEW Reportes.vw_RankingSocioGasto
+AS
+SELECT
+    s.nombre,
+    SUM(f.monto) AS gasto_total,
+    RANK() OVER (ORDER BY SUM(f.monto) DESC) AS ranking_gasto,
+    SUM(SUM(f.monto)) OVER (ORDER BY SUM(f.monto) DESC) /
+        SUM(SUM(f.monto)) OVER () * 100 AS porcentaje_acumulado
+FROM Negocio.SOCIO s 
+INNER JOIN Negocio.FACTURA f ON s.id = f.id_socio 
+GROUP BY s.id, s.nombre, s.email, s.estado;
+
+
+-- Vista con función ventana 2: Análisis de ocupación de clases.
+CREATE VIEW Reportes.vw_OcupacionClases
+AS
+SELECT
+    c.tipo AS nombre_clase,
+    e.especialidad,
+    COUNT(r.id) AS total_reservas,
+    CAST(COUNT(r.id) AS DECIMAL(10,2)) / c.cupo * 100 AS porcentaje_ocupacion,
+    RANK() OVER (PARTITION BY e.especialidad ORDER BY COUNT(r.id) DESC) AS ranking_por_especialidad,
+    COUNT(r.id) - AVG(COUNT(r.id)) OVER (PARTITION BY e.especialidad) AS diferencia_vs_promedio,
+    CASE
+        WHEN COUNT(r.id) >= c.cupo THEN 'LLENO'
+        WHEN CAST(COUNT(r.id) AS DECIMAL(10,2)) / c.cupo >= 0.90 THEN 'CASI LLENO'
+        ELSE 'DISPONIBLE/BAJA DEMANDA'
+    END AS estado_visual
+FROM Negocio.CLASE c
+INNER JOIN Negocio.ENTRENADOR e ON c.id_entrenador = e.id 
+LEFT JOIN Negocio.RESERVA r ON c.id = r.id_clase 
+GROUP BY c.id, c.tipo, c.cupo, e.especialidad;
+
+
+-- Vista con función ventana 3: Análisis temporal de ingresos.
+CREATE VIEW Reportes.vw_IngresosAcumulados
+AS
+WITH IngresosMensuales AS (
+    SELECT
+        YEAR(fecha_pago) AS anio,
+        MONTH(fecha_pago) AS mes,
+        DATEFROMPARTS(YEAR(fecha_pago), MONTH(fecha_pago), 1) AS MesFecha,
+        SUM(monto) AS ingreso_mensual
+    FROM Negocio.FACTURA
+    GROUP BY YEAR(fecha_pago), MONTH(fecha_pago), DATEFROMPARTS(YEAR(fecha_pago), MONTH(fecha_pago), 1)
+)
+SELECT
+    anio,
+    mes,
+    MesFecha,
+    ingreso_mensual,
+    SUM(ingreso_mensual) OVER (
+		PARTITION BY anio
+        ORDER BY MesFecha
+        ROWS UNBOUNDED PRECEDING
+    ) AS ingreso_acumulado_anio,
+    ISNULL(
+        (ingreso_mensual - LAG(ingreso_mensual, 1) OVER (ORDER BY MesFecha)) /
+        LAG(ingreso_mensual, 1) OVER (ORDER BY MesFecha) * 100
+    , 0) AS crecimiento_porcentual,
+    AVG(ingreso_mensual) OVER (
+        ORDER BY MesFecha
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS promedio_movil_3meses
+FROM IngresosMensuales;
+
+
+-- Vista de resumen: Muestra la distribución de ingresos por cada método de pago.
+CREATE VIEW Reportes.vw_MetodosPago
+AS
+SELECT
+    metodo_pago,
+    COUNT(id) AS TotalFacturas,
+    SUM(monto) AS MontoTotalRecaudado
+FROM Negocio.FACTURA
+GROUP BY metodo_pago;
