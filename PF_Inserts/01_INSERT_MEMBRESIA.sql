@@ -23,4 +23,4 @@ INSERT INTO Negocio.MEMBRESIA (tipo, duracion, precio) VALUES
 ('VIP', 'Trimestral', 135.00),          -- (50 x 3) - 10% = 150 - 15 = $135.00
 ('VIP', 'Anual', 480.00);               -- (50 x 12) - 20% = 600 - 120 = $480.00
 
-SELECT * FROM MEMBRESIA;
+SELECT * FROM Negocio.MEMBRESIA;
