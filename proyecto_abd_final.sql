@@ -1,6 +1,5 @@
 -- Proyecto de catedra: GimnasioReserva --
-
--- 1. Preparación de la base de datos.
+-- 1. PreparaciÃ³n de la base de datos.
 
 -- Creando base de datos. --
 USE MASTER;
@@ -21,155 +20,206 @@ CREATE SCHEMA Config;
 
 -- Tabla: SOCIO
 CREATE TABLE Negocio.SOCIO (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    nombre NVARCHAR(100) NOT NULL,
-    telefono NVARCHAR(20) NOT NULL,
-    email NVARCHAR(100) NOT NULL UNIQUE,
-    genero CHAR(1) NOT NULL CHECK (genero IN ('M', 'F')),
-    fecha_registro DATE NOT NULL DEFAULT GETDATE(),
-    estado NVARCHAR(20) NOT NULL DEFAULT 'activo' CHECK (estado IN ('activo', 'inactivo')),
-    dui NVARCHAR(10) UNIQUE
+id INT IDENTITY(1,1) PRIMARY KEY,
+nombre NVARCHAR(100) NOT NULL,
+telefono NVARCHAR(20) NOT NULL,
+email NVARCHAR(100) NOT NULL UNIQUE,
+genero CHAR(1) NOT NULL CHECK (genero IN ('M', 'F')),
+fecha_registro DATE NOT NULL DEFAULT GETDATE(),
+estado NVARCHAR(20) NOT NULL DEFAULT 'activo' CHECK (estado IN ('activo', 'inactivo')),
+dui NVARCHAR(10) UNIQUE
 );
 
 -- Tabla: MEMBRESIA
 CREATE TABLE Negocio.MEMBRESIA (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    tipo NVARCHAR(50) NOT NULL CHECK (tipo IN ('Básica', 'Premium', 'VIP')),
-    duracion NVARCHAR(20) NOT NULL CHECK (duracion IN ('Mensual', 'Trimestral', 'Anual')),
-    precio DECIMAL(10,2) NOT NULL CHECK (precio > 0),
-    CONSTRAINT UQ_MEMBRESIA_TIPO_DURACION UNIQUE (tipo, duracion)
+id INT IDENTITY(1,1) PRIMARY KEY,
+tipo NVARCHAR(50) NOT NULL CHECK (tipo IN ('BÃ¡sica', 'Premium', 'VIP')),
+duracion NVARCHAR(20) NOT NULL CHECK (duracion IN ('Mensual', 'Trimestral', 'Anual')),
+precio DECIMAL(10,2) NOT NULL CHECK (precio > 0),
+CONSTRAINT UQ_MEMBRESIA_TIPO_DURACION UNIQUE (tipo, duracion)
 );
 
 -- Tabla: ENTRENADOR
 CREATE TABLE Negocio.ENTRENADOR (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    nombre NVARCHAR(100) NOT NULL,
-    telefono NVARCHAR(20) NOT NULL,
-    email NVARCHAR(100) NOT NULL UNIQUE,
-    fecha_inicio_inscripcion DATE NOT NULL,
-    fecha_final_inscripcion DATE NULL,
-    salario DECIMAL(10,2) NOT NULL CHECK (salario > 0),
-    especialidad NVARCHAR(100) NOT NULL CHECK (especialidad IN ('Yoga', 'Spinning', 'CrossFit', 'Musculación', 'Calistenia','Pilates'))
+id INT IDENTITY(1,1) PRIMARY KEY,
+nombre NVARCHAR(100) NOT NULL,
+telefono NVARCHAR(20) NOT NULL,
+email NVARCHAR(100) NOT NULL UNIQUE,
+fecha_inicio_inscripcion DATE NOT NULL,
+fecha_final_inscripcion DATE NULL,
+salario DECIMAL(10,2) NOT NULL CHECK (salario > 0),
+especialidad NVARCHAR(100) NOT NULL CHECK (especialidad IN ('Yoga', 'Spinning', 'CrossFit', 'MusculaciÃ³n', 'Calistenia','Pilates'))
 );
 
 -- Tabla: FACTURA
 CREATE TABLE Negocio.FACTURA (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    metodo_pago NVARCHAR(50) NOT NULL CHECK (metodo_pago IN ('efectivo', 'tarjeta', 'transferencia')),
-    monto DECIMAL(10,2) NOT NULL CHECK (monto > 0),
-    fecha_pago DATETIME NOT NULL DEFAULT GETDATE(),
-    id_socio INT NOT NULL,
-    id_membresia INT NOT NULL,
-    CONSTRAINT FK_FACTURA_SOCIO FOREIGN KEY (id_socio) REFERENCES Negocio.SOCIO(id) ON DELETE CASCADE,
-    CONSTRAINT FK_FACTURA_MEMBRESIA FOREIGN KEY (id_membresia) REFERENCES Negocio.MEMBRESIA(id) ON DELETE CASCADE
+id INT IDENTITY(1,1) PRIMARY KEY,
+metodo_pago NVARCHAR(50) NOT NULL CHECK (metodo_pago IN ('efectivo', 'tarjeta', 'transferencia')),
+monto DECIMAL(10,2) NOT NULL CHECK (monto > 0),
+fecha_pago DATETIME NOT NULL DEFAULT GETDATE(),
+id_socio INT NOT NULL,
+id_membresia INT NOT NULL,
+CONSTRAINT FK_FACTURA_SOCIO FOREIGN KEY (id_socio) REFERENCES Negocio.SOCIO(id) ON DELETE CASCADE,
+CONSTRAINT FK_FACTURA_MEMBRESIA FOREIGN KEY (id_membresia) REFERENCES Negocio.MEMBRESIA(id) ON DELETE CASCADE
 );
 
 -- Tabla: CLASE
 CREATE TABLE Negocio.CLASE (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    tipo NVARCHAR(50) NOT NULL,
-    horario TIME NOT NULL,
-    duracion_minutos INT NOT NULL CHECK (duracion_minutos BETWEEN 30 AND 120),
-    cupo INT NOT NULL CHECK (cupo > 0),
-    id_entrenador INT NOT NULL,
-    CONSTRAINT FK_CLASE_ENTRENADOR FOREIGN KEY (id_entrenador) REFERENCES Negocio.ENTRENADOR(id) ON DELETE CASCADE
+id INT IDENTITY(1,1) PRIMARY KEY,
+tipo NVARCHAR(50) NOT NULL,
+horario TIME NOT NULL,
+duracion_minutos INT NOT NULL CHECK (duracion_minutos BETWEEN 30 AND 120),
+cupo INT NOT NULL CHECK (cupo > 0),
+id_entrenador INT NOT NULL,
+CONSTRAINT FK_CLASE_ENTRENADOR FOREIGN KEY (id_entrenador) REFERENCES Negocio.ENTRENADOR(id) ON DELETE CASCADE
 );
 
 -- Tabla: RESERVA
 CREATE TABLE Negocio.RESERVA (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    fecha_reserva DATE NOT NULL DEFAULT GETDATE(),
-    fecha_clase DATE NOT NULL,
-    id_socio INT NOT NULL,
-    id_clase INT NOT NULL,
-    CONSTRAINT FK_RESERVA_SOCIO FOREIGN KEY (id_socio) REFERENCES Negocio.SOCIO(id) ON DELETE CASCADE,
-    CONSTRAINT FK_RESERVA_CLASE FOREIGN KEY (id_clase) REFERENCES Negocio.CLASE(id),
-    CONSTRAINT UQ_RESERVA_SOCIO_CLASE_FECHA UNIQUE (id_socio, id_clase, fecha_clase),
-    CONSTRAINT CK_RESERVA_FECHAS CHECK (fecha_clase >= fecha_reserva)
+id INT IDENTITY(1,1) PRIMARY KEY,
+fecha_reserva DATE NOT NULL DEFAULT GETDATE(),
+fecha_clase DATE NOT NULL,
+id_socio INT NOT NULL,
+id_clase INT NOT NULL,
+CONSTRAINT FK_RESERVA_SOCIO FOREIGN KEY (id_socio) REFERENCES Negocio.SOCIO(id) ON DELETE CASCADE,
+CONSTRAINT FK_RESERVA_CLASE FOREIGN KEY (id_clase) REFERENCES Negocio.CLASE(id),
+CONSTRAINT UQ_RESERVA_SOCIO_CLASE_FECHA UNIQUE (id_socio, id_clase, fecha_clase),
+CONSTRAINT CK_RESERVA_FECHAS CHECK (fecha_clase >= fecha_reserva)
 );
 
 -- Creando tablas de auditoria. --
-
 CREATE TABLE Auditoria.SOCIO_Audit (
-    audit_id INT IDENTITY(1,1) PRIMARY KEY,
-    id_socio INT NOT NULL,
-    operacion VARCHAR(10) NOT NULL,
-    nombre_anterior VARCHAR(100),
-    nombre_nuevo VARCHAR(100),
-    email_anterior VARCHAR(100),
-    email_nuevo VARCHAR(100),
-    estado_anterior VARCHAR(20),
-    estado_nuevo VARCHAR(20),
-    usuario VARCHAR(100) DEFAULT SYSTEM_USER,
-    fecha_operacion DATETIME DEFAULT GETDATE(),
-    host_name VARCHAR(100) DEFAULT HOST_NAME(),
-    app_name VARCHAR(100) DEFAULT APP_NAME()
+audit_id INT IDENTITY(1,1) PRIMARY KEY,
+id_socio INT NOT NULL,
+operacion VARCHAR(10) NOT NULL,
+nombre_anterior VARCHAR(100),
+nombre_nuevo VARCHAR(100),
+email_anterior VARCHAR(100),
+email_nuevo VARCHAR(100),
+estado_anterior VARCHAR(20),
+estado_nuevo VARCHAR(20),
+usuario VARCHAR(100) DEFAULT SYSTEM_USER,
+fecha_operacion DATETIME DEFAULT GETDATE(),
+host_name VARCHAR(100) DEFAULT HOST_NAME(),
+app_name VARCHAR(100) DEFAULT APP_NAME()
 );
 
 CREATE TABLE Auditoria.FACTURA_Audit (
-    audit_id INT IDENTITY(1,1) PRIMARY KEY,
-    id_factura INT NOT NULL,
-    operacion VARCHAR(10) NOT NULL,
-    id_socio_anterior INT,
-    id_socio_nuevo INT,
-    monto_anterior DECIMAL(10,2),
-    monto_nuevo DECIMAL(10,2),
-    metodo_pago_anterior VARCHAR(50),
-    metodo_pago_nuevo VARCHAR(50),
-    fecha_pago_anterior DATE,
-    fecha_pago_nuevo DATE,
-    usuario VARCHAR(100) DEFAULT SYSTEM_USER,
-    fecha_operacion DATETIME DEFAULT GETDATE(),
-    host_name VARCHAR(100) DEFAULT HOST_NAME(),
-    app_name VARCHAR(100) DEFAULT APP_NAME()
+audit_id INT IDENTITY(1,1) PRIMARY KEY,
+id_factura INT NOT NULL,
+operacion VARCHAR(10) NOT NULL,
+id_socio_anterior INT,
+id_socio_nuevo INT,
+monto_anterior DECIMAL(10,2),
+monto_nuevo DECIMAL(10,2),
+metodo_pago_anterior VARCHAR(50),
+metodo_pago_nuevo VARCHAR(50),
+fecha_pago_anterior DATE,
+fecha_pago_nuevo DATE,
+usuario VARCHAR(100) DEFAULT SYSTEM_USER,
+fecha_operacion DATETIME DEFAULT GETDATE(),
+host_name VARCHAR(100) DEFAULT HOST_NAME(),
+app_name VARCHAR(100) DEFAULT APP_NAME()
 );
 
 
--- 2. Inserción de datos y estructura de mantenimiento.
+-- 2. InserciÃ³n de datos y estructura de mantenimiento.
 
--- Ejecutar los otros scripts con los insert de cada tabla. --
+BULK INSERT Negocio.RESERVA
+FROM 'C:\Bulk_data\06_INSERT_RESERVA.csv'
+WITH (
+    FIRSTROW = 2,
+    FIELDTERMINATOR = ',',
+    ROWTERMINATOR = '0x0A',
+Â Â Â Â TABLOCK
+);
 
--- Creando índices para optimizar funciones ventanas y consultas de auditoría. --
+BULK INSERT Negocio.FACTURA
+FROM 'C:\Bulk_data\05_INSERT_FACTURA.csv'
+WITH (
+    FIRSTROW = 2,             
+    FIELDTERMINATOR = ',',    
+    ROWTERMINATOR = '0x0A',  Â 
+Â Â Â Â TABLOCK
+);
 
--- ÍNDICES FUNCIÓN VENTANA 1: RANKING DE SOCIOS POR GASTO TOTAL
+BULK INSERT Negocio.CLASE
+FROM 'C:\Bulk_data\04_INSERT_CLASE.csv'
+WITH (
+    FIRSTROW = 2,
+    FIELDTERMINATOR = ',',
+    ROWTERMINATOR = '0x0A',
+Â Â Â Â TABLOCK
+);
 
--- Índice compuesto para JOIN entre SOCIO y FACTURA
+BULK INSERT Negocio.SOCIO
+FROM 'C:\Bulk_data\03_INSERT_SOCIO.csv'
+WITH (
+    FIRSTROW = 2,
+    FIELDTERMINATOR = ',',
+    ROWTERMINATOR = '0x0A', 
+    TABLOCK
+);
+
+BULK INSERT Negocio.ENTRENADOR
+FROM 'C:\Bulk_data\02_INSERT_ENTRENADOR.csv'
+WITH (
+    FIRSTROW = 2,
+    FIELDTERMINATOR = ',',
+    ROWTERMINATOR = '0x0A',
+Â Â Â Â TABLOCK
+);
+
+BULK INSERT Negocio.MEMBRESIA
+FROM 'C:\Bulk_data\01_INSERT_MEMBRESIA.csv'
+WITH (
+    FIRSTROW = 2,
+    FIELDTERMINATOR = ',',
+    ROWTERMINATOR = '0x0A',
+Â Â Â Â TABLOCK
+);
+
+-- Creando Ã­ndices para optimizar funciones ventanas y consultas de auditorÃ­a. --
+
+-- ÃNDICES FUNCIÃ“N VENTANA 1: RANKING DE SOCIOS POR GASTO TOTAL
+
+-- Ãndice compuesto para JOIN entre SOCIO y FACTURA
 CREATE NONCLUSTERED INDEX IX_FACTURA_Socio_Monto
 ON Negocio.FACTURA(id_socio, monto)
 INCLUDE (id, fecha_pago);
 
--- Índice para filtrar socios por estado
+-- Ãndice para filtrar socios por estado
 CREATE NONCLUSTERED INDEX IX_SOCIO_Estado_Nombre
 ON Negocio.SOCIO(estado, nombre)
 INCLUDE (id, email);
 
 
--- ÍNDICES FUNCIÓN VENTANA 2: ANÁLISIS DE OCUPACIÓN DE CLASES
+-- ÃNDICES FUNCIÃ“N VENTANA 2: ANÃLISIS DE OCUPACIÃ“N DE CLASES
 
--- Índice para JOIN entre CLASE y RESERVA
+-- Ãndice para JOIN entre CLASE y RESERVA
 CREATE NONCLUSTERED INDEX IX_RESERVA_Clase_FechaClase_Opt
 ON Negocio.RESERVA(id_clase, fecha_clase)
 INCLUDE (id, id_socio);
 
--- Índice para CLASE con especialidad del entrenador
+-- Ãndice para CLASE con especialidad del entrenador
 CREATE NONCLUSTERED INDEX IX_CLASE_Entrenador_Tipo
 ON Negocio.CLASE(id_entrenador, tipo, horario)
 INCLUDE (cupo);
 
--- Índice para ENTRENADOR especialidad
+-- Ãndice para ENTRENADOR especialidad
 CREATE NONCLUSTERED INDEX IX_ENTRENADOR_Especialidad_Opt
 ON Negocio.ENTRENADOR(especialidad)
 INCLUDE (id, nombre, email);
 
 
--- ÍNDICES FUNCIÓN VENTANA 3: ANÁLISIS TEMPORAL DE INGRESOS
+-- ÃNDICES FUNCIÃ“N VENTANA 3: ANÃLISIS TEMPORAL DE INGRESOS
 
--- Índice para análisis temporal de facturas
+-- Ãndice para anÃ¡lisis temporal de facturas
 CREATE NONCLUSTERED INDEX IX_FACTURA_FechaPago_Monto_Opt
 ON Negocio.FACTURA(fecha_pago, monto)
 INCLUDE (id, metodo_pago);
 
--- Índice para agrupaciones por año/mes
+-- Ãndice para agrupaciones por aÃ±o/mes
 CREATE NONCLUSTERED INDEX IX_FACTURA_AnioMes
 ON Negocio.FACTURA(fecha_pago)
 INCLUDE (monto, id);
@@ -177,18 +227,18 @@ INCLUDE (monto, id);
 
 -- Para tabla de Auditoria.Socio_audit
 
--- Índice para auditoría por fecha y socio
+-- Ãndice para auditorÃ­a por fecha y socio
 CREATE NONCLUSTERED INDEX IX_SOCIO_Audit_Fecha
 ON Auditoria.SOCIO_Audit(fecha_operacion DESC, id_socio);
 
 -- Para tabla de Auditoria.FACTURA_Audit
 
--- Índice para auditoría por fecha y factura
+-- Ãndice para auditorÃ­a por fecha y factura
 CREATE NONCLUSTERED INDEX IX_FACTURA_Audit_Fecha
 ON Auditoria.FACTURA_Audit(fecha_operacion DESC, id_factura);
 
 
--- Actualización de estadísticas después de crear índices --
+-- ActualizaciÃ³n de estadÃ­sticas despuÃ©s de crear Ã­ndices --
 UPDATE STATISTICS Negocio.SOCIO WITH FULLSCAN;
 UPDATE STATISTICS Negocio.FACTURA WITH FULLSCAN;
 UPDATE STATISTICS Negocio.CLASE WITH FULLSCAN;
@@ -198,11 +248,11 @@ UPDATE STATISTICS Auditoria.SOCIO_Audit WITH FULLSCAN;
 UPDATE STATISTICS Auditoria.FACTURA_Audit WITH FULLSCAN;
 
 
--- 3. Lógica de negocio y análisis avanzado.
+-- 3. LÃ³gica de negocio y anÃ¡lisis avanzado.
 
--- Creando triggers de auditoría. --
+-- Creando triggers de auditorÃ­a. --
 
--- Registra la creación de un nuevo socio en la tabla de Auditoría.
+-- Registra la creaciÃ³n de un nuevo socio en la tabla de AuditorÃ­a.
 CREATE TRIGGER trg_SOCIO_Insert_Audit
 ON Negocio.SOCIO
 AFTER INSERT
@@ -239,7 +289,7 @@ BEGIN
     INNER JOIN deleted d ON i.id = d.id;
 END
 
--- Registra la eliminación de un socio, capturando los valores eliminados.
+-- Registra la eliminaciÃ³n de un socio, capturando los valores eliminados.
 CREATE TRIGGER trg_SOCIO_Delete_Audit
 ON Negocio.SOCIO
 AFTER DELETE
@@ -254,7 +304,7 @@ BEGIN
     FROM deleted d;
 END
 
--- Registra la inserción de una nueva factura.
+-- Registra la inserciÃ³n de una nueva factura.
 CREATE TRIGGER trg_FACTURA_Insert_Audit
 ON Negocio.FACTURA
 AFTER INSERT
@@ -296,7 +346,7 @@ BEGIN
     INNER JOIN deleted d ON i.id = d.id;
 END
 
--- Registra la anulación o eliminación de una factura.
+-- Registra la anulaciÃ³n o eliminaciÃ³n de una factura.
 CREATE TRIGGER trg_FACTURA_Delete_Audit
 ON Negocio.FACTURA
 AFTER DELETE
@@ -316,11 +366,11 @@ BEGIN
 END
 
 
--- Creando stored procedures y vistas de auditoría. --
+-- Creando stored procedures y vistas de auditorÃ­a. --
 
 -- Stored procedures
 
--- Devuelve el tamaño en MB y número de registros de cada tabla.
+-- Devuelve el tamaÃ±o en MB y nÃºmero de registros de cada tabla.
 CREATE PROCEDURE Config.sp_ObtenerDimensionamientoTablas
 AS
 BEGIN
@@ -346,7 +396,7 @@ BEGIN
     ORDER BY espacio_usado_mb DESC;
 END
 
--- Permite consultar el historial de auditoría de socios aplicando filtros.
+-- Permite consultar el historial de auditorÃ­a de socios aplicando filtros.
 CREATE PROCEDURE Auditoria.sp_ConsultarAuditoriaSocio
     @fecha_inicio DATETIME = NULL,
     @fecha_fin DATETIME = NULL,
@@ -355,8 +405,7 @@ CREATE PROCEDURE Auditoria.sp_ConsultarAuditoriaSocio
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT * 
-    FROM Auditoria.vw_Auditoria_SOCIO
+    SELECT * FROM Auditoria.vw_Auditoria_SOCIO
     WHERE 
         (@fecha_inicio IS NULL OR fecha_operacion >= @fecha_inicio)
         AND (@fecha_fin IS NULL OR fecha_operacion <= @fecha_fin)
@@ -365,7 +414,7 @@ BEGIN
     ORDER BY fecha_operacion DESC;
 END
 
--- Permite consultar el historial de auditoría de facturas aplicando filtros.
+-- Permite consultar el historial de auditorÃ­a de facturas aplicando filtros.
 CREATE PROCEDURE Auditoria.sp_ConsultarAuditoriaFactura
     @fecha_inicio DATETIME = NULL,
     @fecha_fin DATETIME = NULL,
@@ -374,8 +423,7 @@ CREATE PROCEDURE Auditoria.sp_ConsultarAuditoriaFactura
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT * 
-    FROM Auditoria.vw_Auditoria_FACTURA
+    SELECT * FROM Auditoria.vw_Auditoria_FACTURA
     WHERE 
         (@fecha_inicio IS NULL OR fecha_operacion >= @fecha_inicio)
         AND (@fecha_fin IS NULL OR fecha_operacion <= @fecha_fin)
@@ -387,7 +435,7 @@ END
 
 -- Vistas
 
--- Vista para consultar la auditoría de socios, añadiendo el nombre actual del socio y el tipo de cambio.
+-- Vista para consultar la auditorÃ­a de socios, aÃ±adiendo el nombre actual del socio y el tipo de cambio.
 CREATE VIEW Auditoria.vw_Auditoria_SOCIO
 AS
 SELECT 
@@ -406,15 +454,15 @@ SELECT
     a.host_name,
     a.app_name,
     CASE 
-        WHEN a.nombre_anterior != a.nombre_nuevo THEN 'Cambió nombre'
-        WHEN a.email_anterior != a.email_nuevo THEN 'Cambió email'
-        WHEN a.estado_anterior != a.estado_nuevo THEN 'Cambió estado'
+        WHEN a.nombre_anterior != a.nombre_nuevo THEN 'CambiÃ³ nombre'
+        WHEN a.email_anterior != a.email_nuevo THEN 'CambiÃ³ email'
+        WHEN a.estado_anterior != a.estado_nuevo THEN 'CambiÃ³ estado'
         ELSE 'Nuevo registro'
     END AS tipo_cambio
 FROM Auditoria.SOCIO_Audit a
 LEFT JOIN Negocio.SOCIO s ON a.id_socio = s.id;
 
--- Vista para consultar la auditoría de facturas, añadiendo la diferencia de monto y el tipo de cambio.
+-- Vista para consultar la auditorÃ­a de facturas, aÃ±adiendo la diferencia de monto y el tipo de cambio.
 CREATE VIEW Auditoria.vw_Auditoria_FACTURA
 AS
 SELECT 
@@ -435,10 +483,10 @@ SELECT
     a.host_name,
     a.app_name,
     CASE 
-        WHEN a.monto_anterior != a.monto_nuevo THEN 'Cambió monto'
-        WHEN a.metodo_pago_anterior != a.metodo_pago_nuevo THEN 'Cambió método de pago'
-        WHEN a.fecha_pago_anterior != a.fecha_pago_nuevo THEN 'Cambió fecha'
-        WHEN a.id_socio_anterior != a.id_socio_nuevo THEN 'Cambió socio'
+        WHEN a.monto_anterior != a.monto_nuevo THEN 'CambiÃ³ monto'
+        WHEN a.metodo_pago_anterior != a.metodo_pago_nuevo THEN 'CambiÃ³ mÃ©todo de pago'
+        WHEN a.fecha_pago_anterior != a.fecha_pago_nuevo THEN 'CambiÃ³ fecha'
+        WHEN a.id_socio_anterior != a.id_socio_nuevo THEN 'CambiÃ³ socio'
         ELSE 'Nuevo registro'
     END AS tipo_cambio
 FROM Auditoria.FACTURA_Audit a
@@ -449,7 +497,7 @@ LEFT JOIN Negocio.SOCIO s_nue ON a.id_socio_nuevo = s_nue.id;
 -- Creando vistas de reporte con funciones ventana y agregaciones para power bi.
 
 
--- Vista con función ventana 1: Ranking de socios por gasto total.
+-- Vista con funciÃ³n ventana 1: Ranking de socios por gasto total.
 CREATE VIEW Reportes.vw_RankingSocioGasto
 AS
 SELECT
@@ -463,7 +511,7 @@ INNER JOIN Negocio.FACTURA f ON s.id = f.id_socio
 GROUP BY s.id, s.nombre, s.email, s.estado;
 
 
--- Vista con función ventana 2: Análisis de ocupación de clases.
+-- Vista con funciÃ³n ventana 2: AnÃ¡lisis de ocupaciÃ³n de clases.
 CREATE VIEW Reportes.vw_OcupacionClases
 AS
 SELECT
@@ -484,7 +532,7 @@ LEFT JOIN Negocio.RESERVA r ON c.id = r.id_clase
 GROUP BY c.id, c.tipo, c.cupo, e.especialidad;
 
 
--- Vista con función ventana 3: Análisis temporal de ingresos.
+-- Vista con funciÃ³n ventana 3: AnÃ¡lisis temporal de ingresos.
 CREATE VIEW Reportes.vw_IngresosAcumulados
 AS
 WITH IngresosMensuales AS (
@@ -502,7 +550,7 @@ SELECT
     MesFecha,
     ingreso_mensual,
     SUM(ingreso_mensual) OVER (
-		PARTITION BY anio
+        PARTITION BY anio
         ORDER BY MesFecha
         ROWS UNBOUNDED PRECEDING
     ) AS ingreso_acumulado_anio,
@@ -517,7 +565,7 @@ SELECT
 FROM IngresosMensuales;
 
 
--- Vista de resumen: Muestra la distribución de ingresos por cada método de pago.
+-- Vista de resumen: Muestra la distribuciÃ³n de ingresos por cada mÃ©todo de pago.
 CREATE VIEW Reportes.vw_MetodosPago
 AS
 SELECT
@@ -557,7 +605,7 @@ GRANT SELECT ON Negocio.CLASE TO R_Asistente_Administrativo;
 GRANT SELECT ON Negocio.ENTRENADOR TO R_Asistente_Administrativo;
 
 -- ROL 2: R_Contabilidad.
--- Tareas: Acceso total a socios y facturas, y consultas de auditoría.
+-- Tareas: Acceso total a socios y facturas, y consultas de auditorÃ­a.
 GRANT SELECT, INSERT, UPDATE, DELETE ON Negocio.SOCIO TO R_Contabilidad;
 GRANT SELECT, INSERT, UPDATE, DELETE ON Negocio.FACTURA TO R_Contabilidad;
 GRANT EXECUTE ON SCHEMA::Auditoria TO R_Contabilidad;
@@ -594,7 +642,7 @@ BACKUP LOG GimnasioReservas
 TO DISK = 'C:\Backups\Gym_Cadena.trn'
 WITH NOINIT;
 
--- Comandos de restauración. --
+-- Comandos de restauraciÃ³n. --
 
 USE MASTER;
 
