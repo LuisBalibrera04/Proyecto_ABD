@@ -663,3 +663,6 @@ FROM DISK = 'C:\Backups\Gym_Cadena.trn' WITH RECOVERY;
 -- Volviendo a multiusuario.
 ALTER DATABASE GimnasioReservas
 SET MULTI_USER;
+
+--Prueba de dimensionamiento
+EXEC Config.sp_ObtenerDimensionamientoTablas;
